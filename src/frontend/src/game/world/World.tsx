@@ -6,14 +6,19 @@ import { ReactElement } from 'react';
 import PowerLines from './PowerLines';
 import HighwayAndBridge from './HighwayAndBridge';
 import GasStop from './GasStop';
+import InfiniteRoad from './InfiniteRoad';
+import ConstructionEvents from './ConstructionEvents';
+import PowerStations from './PowerStations';
+import CityClusters from './CityClusters';
+import TruckStop from './TruckStop';
 
 interface WorldProps {
   onGroundClick?: (point: [number, number, number]) => void;
+  playerPosition?: Vector3;
 }
 
-export default function World({ onGroundClick }: WorldProps) {
+export default function World({ onGroundClick, playerPosition }: WorldProps) {
   const groundRef = useRef<Mesh>(null);
-  const roadRef = useRef<Mesh>(null);
 
   // Load PBR textures for ground
   const [groundAlbedo, groundNormal] = useLoader(THREE.TextureLoader, [
@@ -21,37 +26,14 @@ export default function World({ onGroundClick }: WorldProps) {
     '/assets/generated/ground-normal.dim_1024x1024.png',
   ]);
 
-  // Load upgraded PBR textures for road
-  const [roadAlbedo, roadNormal, roadMarkings] = useLoader(THREE.TextureLoader, [
-    '/assets/generated/road-albedo-v2.dim_1024x1024.png',
-    '/assets/generated/road-normal-v2.dim_1024x1024.png',
-    '/assets/generated/road-markings-mask.dim_1024x1024.png',
-  ]);
-
   // Configure texture wrapping and repeat for natural tiling
   useMemo(() => {
     [groundAlbedo, groundNormal].forEach(texture => {
       texture.wrapS = texture.wrapT = RepeatWrapping;
-      texture.repeat.set(50, 50); // Tile across the large ground plane
-      texture.anisotropy = 16; // Improve texture quality at angles
+      texture.repeat.set(50, 50);
+      texture.anisotropy = 16;
     });
   }, [groundAlbedo, groundNormal]);
-
-  // Configure road textures for tiling along the road corridor
-  useMemo(() => {
-    [roadAlbedo, roadNormal].forEach(texture => {
-      texture.wrapS = texture.wrapT = RepeatWrapping;
-      texture.repeat.set(1, 100); // Tile lengthwise along the road
-      texture.anisotropy = 16; // Critical for shallow viewing angles
-    });
-  }, [roadAlbedo, roadNormal]);
-
-  // Configure road markings texture
-  useMemo(() => {
-    roadMarkings.wrapS = roadMarkings.wrapT = RepeatWrapping;
-    roadMarkings.repeat.set(1, 100);
-    roadMarkings.anisotropy = 16;
-  }, [roadMarkings]);
 
   const handleClick = (event: any) => {
     event.stopPropagation();
@@ -79,39 +61,8 @@ export default function World({ onGroundClick }: WorldProps) {
         />
       </mesh>
 
-      {/* Road corridor - realistic asphalt with lane markings */}
-      <mesh
-        ref={roadRef}
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, 0.02, 0]}
-        receiveShadow
-        onClick={handleClick}
-      >
-        <planeGeometry args={[12, 2000, 50, 500]} />
-        <meshStandardMaterial 
-          map={roadAlbedo}
-          normalMap={roadNormal}
-          roughness={0.7}
-          metalness={0.05}
-        />
-      </mesh>
-
-      {/* Road lane markings overlay */}
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, 0.03, 0]}
-        onClick={handleClick}
-      >
-        <planeGeometry args={[12, 2000, 50, 500]} />
-        <meshStandardMaterial 
-          map={roadMarkings}
-          transparent={true}
-          opacity={0.8}
-          roughness={0.8}
-          metalness={0.0}
-          depthWrite={false}
-        />
-      </mesh>
+      {/* Infinite road system */}
+      <InfiniteRoad playerPosition={playerPosition} onGroundClick={handleClick} />
 
       {/* Grid helper for visual reference */}
       <gridHelper args={[2000, 200, '#4a5a4a', '#3a4a3a']} position={[0, 0.01, 0]} />
@@ -124,6 +75,18 @@ export default function World({ onGroundClick }: WorldProps) {
 
       {/* Gas station */}
       <GasStop />
+
+      {/* Construction events */}
+      <ConstructionEvents playerPosition={playerPosition} />
+
+      {/* Power stations */}
+      <PowerStations playerPosition={playerPosition} />
+
+      {/* City clusters */}
+      <CityClusters playerPosition={playerPosition} />
+
+      {/* Truck stop */}
+      <TruckStop />
 
       {/* Some scattered obstacles/landmarks for visual interest */}
       <ScatteredObjects />

@@ -42,7 +42,6 @@ export default function HighwayAndBridge() {
           rotation={[-Math.PI / 2, 0, 0]}
           position={[0, 0.02, 0]}
           receiveShadow
-          raycast={() => null}
         >
           <planeGeometry args={[24, 400, 50, 200]} />
           <meshStandardMaterial
@@ -59,7 +58,6 @@ export default function HighwayAndBridge() {
             key={i}
             rotation={[-Math.PI / 2, 0, 0]}
             position={[offset, 0.03, 0]}
-            raycast={() => null}
           >
             <planeGeometry args={[0.2, 400]} />
             <meshStandardMaterial color="#ffeb3b" roughness={0.8} />
@@ -67,17 +65,48 @@ export default function HighwayAndBridge() {
         ))}
       </group>
 
-      {/* Bridge/Overpass */}
-      <group position={[-80, 0, 100]}>
-        {/* Bridge deck */}
+      {/* Drivable Bridge/Overpass with approach ramps */}
+      <group position={[-30, 0, 100]}>
+        {/* Approach ramp (connects ground to bridge deck) */}
+        <mesh
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[0, 4, -50]}
+          receiveShadow
+          castShadow
+        >
+          <planeGeometry args={[18, 40, 20, 40]} />
+          <meshStandardMaterial
+            map={roadAlbedo}
+            normalMap={roadNormal}
+            roughness={0.7}
+            metalness={0.05}
+          />
+        </mesh>
+
+        {/* Bridge deck (drivable surface) */}
         <mesh
           rotation={[-Math.PI / 2, 0, 0]}
           position={[0, 8, 0]}
           receiveShadow
           castShadow
-          raycast={() => null}
         >
           <planeGeometry args={[18, 80, 20, 40]} />
+          <meshStandardMaterial
+            map={roadAlbedo}
+            normalMap={roadNormal}
+            roughness={0.7}
+            metalness={0.05}
+          />
+        </mesh>
+
+        {/* Exit ramp (connects bridge deck back to ground) */}
+        <mesh
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[0, 4, 50]}
+          receiveShadow
+          castShadow
+        >
+          <planeGeometry args={[18, 40, 20, 40]} />
           <meshStandardMaterial
             map={roadAlbedo}
             normalMap={roadNormal}
@@ -172,7 +201,6 @@ export default function HighwayAndBridge() {
           rotation={[-Math.PI / 2, 0, 0]}
           position={[0, 0.02, 0]}
           receiveShadow
-          raycast={() => null}
         >
           <planeGeometry args={[12, 100, 30, 50]} />
           <meshStandardMaterial

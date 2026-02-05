@@ -3,11 +3,12 @@ import { Canvas } from '@react-three/fiber';
 import { Sky, Stats } from '@react-three/drei';
 import World from './world/World';
 import Truck from './vehicle/Truck';
+import Walker from './vehicle/Walker';
 import FollowCamera from './camera/FollowCamera';
 import HUD from './ui/HUD';
 import RouteVisualizer from './routes/RouteVisualizer';
 import NpcTraffic from './traffic/NpcTraffic';
-import { GameMode } from '../App';
+import { GameMode, VehicleVariant } from '../App';
 import { RouteMetadata, Coordinates } from '../backend';
 import { useRouteCreator } from './routes/RouteCreatorState';
 import { useActiveRoute } from './routes/ActiveRouteState';
@@ -17,13 +18,16 @@ interface GameViewProps {
   gameMode: GameMode;
   activeRoute: RouteMetadata | null;
   onClearRoute: () => void;
+  vehicleVariant: VehicleVariant;
 }
 
-export default function GameView({ gameMode, activeRoute, onClearRoute }: GameViewProps) {
+export default function GameView({ gameMode, activeRoute, onClearRoute, vehicleVariant }: GameViewProps) {
   const truckRef = useRef<any>(null);
+  const walkerRef = useRef<any>(null);
   const { waypoints, addWaypoint } = useRouteCreator();
   const { loadRoute, currentWaypointIndex, distanceToNext } = useActiveRoute();
   const [isMuted, setIsMuted] = useState(false);
+  const [cameraMode, setCameraMode] = useState<'chase' | 'cab'>('chase');
 
   // Get truck state for audio
   const speed = truckRef.current?.speed || 0;
@@ -53,12 +57,20 @@ export default function GameView({ gameMode, activeRoute, onClearRoute }: GameVi
     setIsMuted(prev => !prev);
   };
 
+  const handleToggleCamera = () => {
+    setCameraMode(prev => prev === 'chase' ? 'cab' : 'chase');
+  };
+
   // Convert WaypointDraft[] to Coordinates[]
   const waypointCoordinates: Coordinates[] = waypoints.map(wp => ({
     x: wp.coordinates[0],
     y: wp.coordinates[1],
     z: wp.coordinates[2],
   }));
+
+  // Get active target for camera
+  const activeTarget = gameMode === 'walk' ? walkerRef : truckRef;
+  const playerPosition = activeTarget.current?.position;
 
   return (
     <>
@@ -82,12 +94,18 @@ export default function GameView({ gameMode, activeRoute, onClearRoute }: GameVi
           shadow-camera-bottom={-50}
         />
         
-        <World onGroundClick={handleGroundClick} />
-        <Truck ref={truckRef} gameMode={gameMode} />
-        <FollowCamera target={truckRef} gameMode={gameMode} />
+        <World onGroundClick={handleGroundClick} playerPosition={playerPosition} />
+        
+        {gameMode === 'walk' ? (
+          <Walker ref={walkerRef} />
+        ) : (
+          <Truck ref={truckRef} gameMode={gameMode} vehicleVariant={vehicleVariant} />
+        )}
+        
+        <FollowCamera target={activeTarget} gameMode={gameMode} cameraMode={cameraMode} />
         
         {/* NPC Traffic */}
-        <NpcTraffic playerTruckRef={truckRef} />
+        {gameMode === 'drive' && <NpcTraffic playerTruckRef={truckRef} />}
         
         {/* Route visualization */}
         {gameMode === 'route-creator' && waypoints.length > 0 && (
@@ -106,7 +124,8 @@ export default function GameView({ gameMode, activeRoute, onClearRoute }: GameVi
       </Canvas>
 
       <HUD 
-        truckRef={truckRef} 
+        truckRef={truckRef}
+        walkerRef={walkerRef}
         gameMode={gameMode}
         activeRoute={activeRoute}
         currentWaypointIndex={currentWaypointIndex}
@@ -114,6 +133,8 @@ export default function GameView({ gameMode, activeRoute, onClearRoute }: GameVi
         onClearRoute={onClearRoute}
         isMuted={isMuted}
         onToggleMute={handleToggleMute}
+        cameraMode={cameraMode}
+        onToggleCamera={handleToggleCamera}
       />
     </>
   );

@@ -1,166 +1,199 @@
 {
   "kind": "build_request",
-  "title": "Enhance 3D driving world realism: road, power lines, truck visuals, NPC traffic, highways/bridges, and gas stops",
+  "title": "Expand driving world: infinite drivable highways/bridges, construction events, cities/rest stops, cab camera, and walk mode",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Improve the road surface visuals to look more realistic (asphalt detail, variation, and clear lane/edge definition) while keeping the current road corridor drivable and aligned with the existing world layout.",
+      "text": "Remove the forced truck reset/teleport behavior so the player can continuously drive without being snapped back to a previous location/position.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "user-1"
+          "msg-5"
         ],
         "quotes": [
-          "and more realistic road ..."
+          "stop making go back to where you where just let me drive"
         ]
       },
       "acceptanceCriteria": [
-        "The road corridor in frontend/src/game/world/World.tsx still renders in the same general location/scale, but visually reads as realistic asphalt rather than a flat strip.",
-        "Road has clearly visible lane/edge definition (e.g., subtle lane markings and/or shoulder/edge treatment) without breaking tiling or introducing obvious seams.",
-        "Performance remains stable (no per-frame texture recreation; texture wrapping/repeat is preserved)."
+        "While in Drive Mode, the truck is never automatically repositioned back to the origin (0,1,0) based on distance traveled.",
+        "The previous reset logic in the truck update loop is removed/disabled, and continuous driving works for several minutes without teleporting."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Upgrade the power line set dressing to appear more realistic (pole variety/details and more believable cabling runs) while preserving deterministic placement and ensuring power line meshes do not interfere with ground click interactions for route creation.",
+      "text": "Implement an infinite (endless) highway/road system so the drivable roadway extends continuously in the direction of travel (no visible end), while keeping performance stable.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "user-1"
+          "msg-5"
         ],
         "quotes": [
-          "... and power lines ..."
+          "make highways infinite"
         ]
       },
       "acceptanceCriteria": [
-        "Power lines still render along the roadside corridor and remain deterministic across reloads.",
-        "Utility pole/cable presentation is more detailed/realistic than the current minimal implementation in frontend/src/game/world/PowerLines.tsx.",
-        "Power line meshes continue to ignore raycasts (or otherwise do not block ground clicks) in route-creator mode."
+        "The roadway appears endless by reusing/repositioning road/highway segments as the player advances.",
+        "There is no visible “end of road” within normal viewing distance while driving straight for an extended time.",
+        "Frame rate remains stable (no unbounded growth in meshes/objects as distance increases)."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Make the drivable truck look more realistic (more detailed proportions and parts) while keeping the existing driving controls and the imperative truck state used by the camera/HUD/audio.",
+      "text": "Make bridges/overpasses actually drivable by adding a drivable surface/collision/height-following so the truck can drive onto and across bridge decks (including elevated roadway sections).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "user-1"
+          "msg-5"
         ],
         "quotes": [
-          "... and truck ..."
+          "make highways realistic you can drive on bridges also"
         ]
       },
       "acceptanceCriteria": [
-        "Truck remains drivable with the current keyboard controls and still exposes the same TruckHandle fields used elsewhere (position/velocity/rotation/speed/isAccelerating).",
-        "The vehicle model in frontend/src/game/vehicle/Truck.tsx is visually more truck-like (distinct cab/chassis/wheels and improved silhouette) without breaking shadows or camera following.",
-        "No backend changes are required for the truck visual upgrade."
+        "At least one bridge deck in the world is reachable from a roadway connection (e.g., an approach/ramp) and can be driven across.",
+        "When the truck is on the bridge deck, its Y position aligns to the deck height (no floating below the deck, no falling through).",
+        "Route-creator ground clicking still works (drivable/collider meshes do not break waypoint placement interactions)."
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Add NPC traffic cars that drive along the road and pass by the player truck (continuous ambient traffic), with safe/despawn behavior and no interference with route editing clicks.",
+      "text": "Add occasional randomized 'construction ahead' road events that spawn sometimes while driving, such as warning signs, cones/barrels, lane closures, and/or barriers placed on/near the roadway.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "user-1"
+          "msg-5"
         ],
         "quotes": [
-          "add npc cars go by on road"
+          "add  construction on road ahead sometimes"
         ]
       },
       "acceptanceCriteria": [
-        "At runtime, multiple NPC cars appear and move along the road direction in at least one lane, looping/spawning so traffic continues over time.",
-        "NPC cars do not block ground clicking for waypoint placement (raycast disabled or appropriate event handling).",
-        "NPC cars update smoothly and do not cause significant frame drops (avoid excessive geometry/material creation per frame)."
+        "While driving forward, the player periodically encounters a construction setup ahead (not constant; appears sometimes).",
+        "Construction props are positioned relative to the road/highway so they read clearly as a roadwork zone.",
+        "Construction props recycle with the infinite road system (they do not accumulate infinitely in memory)."
       ]
     },
     {
       "id": "REQ-5",
-      "text": "Add additional world road features representing highways and bridges/overpasses (e.g., a wider multi-lane highway segment and at least one bridge/raised crossing) integrated into the existing world scene.",
+      "text": "Add random power stations/substations as roadside landmarks distributed throughout the world (more than just power lines), with placement that feels believable along the highway/road.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "user-1"
+          "msg-5"
         ],
         "quotes": [
-          "... and routes highways and bridges ..."
+          "add power stations all over random"
         ]
       },
       "acceptanceCriteria": [
-        "The world contains at least one clearly identifiable highway-style segment (wider road or multi-lane appearance) in addition to the current main road corridor.",
-        "The world contains at least one bridge/overpass element (raised roadway section with supports/guardrails) that is visually distinct from flat ground roads.",
-        "New structures are placed so the player can visually encounter them while driving; they do not break existing route creation interactions."
+        "Multiple power station/substation landmarks are visible in different locations while driving.",
+        "Power stations are placed off the main drivable lane (no blocking the primary roadway by default).",
+        "Placement is stable during a session (no rapid popping/flickering at the same location)."
       ]
     },
     {
       "id": "REQ-6",
-      "text": "Add gas places/stops to the world as recognizable roadside points of interest (e.g., simple gas station structure with canopy/pumps/signage) positioned near the road/highway.",
+      "text": "Add city areas as recognizable clusters (e.g., skyline blocks/building groups) that appear along the drive so the world includes cities/towns the player can drive near/through.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "user-1"
+          "msg-5"
         ],
         "quotes": [
-          "... and gas places"
+          "add city's"
         ]
       },
       "acceptanceCriteria": [
-        "At least one gas stop structure is visible near the road/highway and reads clearly as a gas station from the driving camera.",
-        "Gas stop meshes do not block route-creator ground clicks (raycast disabled or appropriate click handling).",
-        "Gas stop assets are implemented as lightweight Three.js primitives/materials and/or generated textures stored under frontend/public/assets/generated (no backend asset serving)."
+        "At least one city cluster is visible from the roadway and feels distinct from scattered roadside props (dense buildings vs. random boxes).",
+        "City clusters integrate with the infinite driving approach (repeat/reposition without infinite accumulation)."
       ]
     },
     {
       "id": "REQ-7",
-      "text": "Add any newly generated textures as static assets under frontend/public/assets/generated and update the world/vehicle components to load and use them appropriately.",
+      "text": "Add semi-truck-only rest stops (truck stops) as world locations, including visible signage indicating trucks/semi parking only and features like parking bays suitable for a semi-truck.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "user-1"
+          "msg-5"
+        ],
+        "quotes": [
+          "add rest stop only for semis"
         ]
       },
       "acceptanceCriteria": [
-        "All new/updated image assets are referenced via /assets/generated/... paths and are loaded on the frontend using the existing texture loading approach (useLoader + RepeatWrapping where applicable).",
-        "No backend endpoints are introduced for serving images.",
-        "The app builds successfully with the new assets included."
+        "At least one rest stop/truck stop location exists near the highway/road with a clear 'TRUCKS ONLY' / 'TRUCK PARKING' style sign (English text).",
+        "The rest stop includes space that visually fits a semi (wider bays/longer pull-through) and is reachable from the drivable road network."
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Add a switchable seat-view (cab/driver) camera mode that the player can toggle while driving, in addition to the existing follow/chase camera.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "add seat view camera to switch to"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A new 'Cab/Seat View' camera mode exists and can be toggled on/off during Drive Mode (via a HUD button and/or a keybind).",
+        "Cab view places the camera inside/near the truck cab with an appropriate forward-looking angle.",
+        "Switching camera modes is smooth and does not break driving controls or HUD speed display."
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Add a walk mode that the player can enter/exit, with keyboard controls for walking movement (forward/back/left/right) using W/A/S/D and arrow keys, and update the on-screen controls help to reflect walk controls when active.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "add walk mode e left right y or use keyboard arrows forward w backward f add"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The app supports a Walk Mode distinct from Drive Mode (player is on-foot instead of controlling the truck).",
+        "In Walk Mode, the player can move using W/ArrowUp (forward), S/ArrowDown (backward), A/ArrowLeft (left), D/ArrowRight (right).",
+        "The HUD controls help changes based on the active mode to show the correct keys for walking vs driving.",
+        "Entering/exiting Walk Mode does not cause teleport resets like the previous bug, and does not break Route Creator mode behavior."
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Add a more clearly 'semi truck' vehicle option/variant for the player (semi tractor + trailer styling), while keeping existing driving controls and the imperative truck state interface used by camera/HUD/audio.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "add semi Ur truck"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The player’s vehicle reads more clearly as a semi-truck (tractor-trailer proportions/details) compared to the current model.",
+        "Driving controls remain the same (W/A/S/D + arrow keys) and the camera/HUD/audio continue to function using the truck ref/state.",
+        "If a selection/toggle is added, it is accessible in the UI without breaking existing gameplay modes."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under frontend/src/components/ui (read-only shadcn/ui sources).",
-    "Do not modify frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, or frontend/src/main.tsx (immutable paths).",
-    "Backend must remain a single Motoko actor in backend/main.mo; introduce backend changes only if strictly required by the requested world/visual features."
+    "Frontend immutable paths must not be modified: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
+    "Keep all backend logic in the existing single Motoko actor (backend/main.mo); do not introduce additional backend services.",
+    "Do not break Route Creator ground-click waypoint placement when adding drivable/collider meshes or new world props."
   ],
   "nonGoals": [
-    "Implementing real-world map data, GPS, or geolocation-based routing.",
-    "Adding multiplayer/real-time traffic synchronization.",
-    "Adding third-party 3D model downloads or external asset pipelines; keep assets local and lightweight.",
-    "Implementing a full economy/refueling mechanic for gas stops (visual set dressing only unless explicitly requested later)."
+    "Adding multiplayer/real-time driving or networking.",
+    "Integrating third-party map/GPS services or real-world map data.",
+    "Implementing full physics simulation (suspension, tire friction models) beyond simple height-following needed for drivable bridges."
   ],
   "imageRequirements": {
-    "required": [
-      "Seamless tiling asphalt road texture, higher realism albedo (road-albedo-v2.dim_1024x1024.png)",
-      "Seamless tiling asphalt road texture, higher realism normal map (road-normal-v2.dim_1024x1024.png)",
-      "Seamless tiling road markings mask/overlay texture (road-markings-mask.dim_1024x1024.png)",
-      "Seamless tiling galvanized metal guardrail texture, albedo (guardrail-albedo.dim_1024x1024.png)",
-      "Seamless tiling galvanized metal guardrail texture, normal map (guardrail-normal.dim_1024x1024.png)",
-      "Seamless tiling painted metal texture for gas station canopy/signage, albedo (gas-metal-albedo.dim_1024x1024.png)",
-      "Seamless tiling painted metal texture for gas station canopy/signage, normal map (gas-metal-normal.dim_1024x1024.png)"
-    ],
-    "edits": [
-      "Increase asphalt realism/detail (road-albedo.dim_1024x1024.png > road-albedo-v2.dim_1024x1024.png)",
-      "Increase asphalt surface depth/detail (road-normal.dim_1024x1024.png > road-normal-v2.dim_1024x1024.png)"
-    ]
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
+    "required": [],
+    "edits": []
   }
 }

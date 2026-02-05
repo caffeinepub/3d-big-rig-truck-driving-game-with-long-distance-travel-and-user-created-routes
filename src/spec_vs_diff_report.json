@@ -1,40 +1,68 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T21:26:27.676Z",
-  "summary": "Diff implements major frontend world/visual upgrades: realistic road textures with markings overlay, enhanced deterministic power lines with raycast disabled, a more detailed truck model (per summary), NPC traffic with spawn/recycle behavior and raycast disabled, added highway + bridge/overpass meshes with guardrails, and a gas stop structure using generated metal textures. However, the diff summary does not show the required generated texture image files being added under frontend/public/assets/generated (only referenced in code). Also includes unrequested driving audio + mute state integration.",
+  "generatedAt": "2026-02-05T21:47:45.195Z",
+  "summary": "Diff implements infinite road tiling, construction events, power stations, city clusters, a truck stop with signage, walk mode with WASD/arrow controls, and a toggleable cab/chase camera. However, the diff summary does not provide clear evidence that the prior forced truck reset/teleport behavior was removed, and bridge drivability/height-following cannot be confidently verified from the truncated Truck/bridge code shown.",
   "missing_requirements": [
     {
-      "id": "REQ-7",
-      "requirement": "Add any newly generated textures as static assets under frontend/public/assets/generated and update the world/vehicle components to load and use them appropriately.",
-      "reason": "Code references multiple new textures under /assets/generated (road v2 albedo/normal, road markings mask, guardrail albedo/normal, gas metal albedo/normal, pole wood textures), but the diff summary does not show any added image files under frontend/public/assets/generated.",
+      "id": "REQ-1",
+      "requirement": "Remove the forced truck reset/teleport behavior so the player can continuously drive without being snapped back to a previous location/position.",
+      "reason": "The provided Truck update-loop snippet is truncated before any prior reset/teleport logic would be shown, and no explicit removal/disablement of a distance-based reset to (0,1,0) is visible in the diff summary.",
       "evidence": [
+        "frontend/src/game/vehicle/Truck.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Make bridges/overpasses actually drivable by adding a drivable surface/collision/height-following so the truck can drive onto and across bridge decks (including elevated roadway sections).",
+      "reason": "A bridge deck and ramps are added as meshes, but the diff summary does not show the truck height-following/collision behavior needed to keep the truck aligned to the elevated deck (the relevant Truck.tsx section is truncated). Also, no explicit confirmation is shown that route-creator ground clicking remains unaffected beyond using onClick handlers on the road meshes.",
+      "evidence": [
+        "frontend/src/game/world/HighwayAndBridge.tsx (truncated)",
+        "frontend/src/game/vehicle/Truck.tsx (truncated)",
         "frontend/src/game/world/World.tsx",
-        "frontend/src/game/world/HighwayAndBridge.tsx",
-        "frontend/src/game/world/GasStop.tsx",
-        "frontend/src/game/world/PowerLines.tsx"
+        "frontend/src/game/world/InfiniteRoad.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Driving audio system integration (useDrivingAudio) and HUD mute/unmute toggle state in GameView.",
-      "reason": "BuildRequest focuses on world realism (roads, power lines, truck visuals, NPC traffic, highways/bridges, gas stops, textures). It explicitly notes no backend changes required for truck visuals and does not request new audio features or mute UI behavior.",
+      "description": "Added a © 2026 footer and a promotional link to caffeine.ai in the main UI.",
+      "reason": "BuildRequest does not ask for adding a footer or external promotional link.",
       "evidence": [
-        "frontend/src/game/GameView.tsx"
+        "frontend/src/App.tsx"
+      ]
+    },
+    {
+      "description": "Mode toggle button labels include emojis.",
+      "reason": "BuildRequest specifies mode/camera functionality and HUD updates, but does not request emoji-based labeling in the UI.",
+      "evidence": [
+        "frontend/src/App.tsx"
+      ]
+    },
+    {
+      "description": "Added performance/diagnostic rendering via drei Stats (imported) in the 3D view.",
+      "reason": "BuildRequest does not request adding a stats/performance overlay.",
+      "evidence": [
+        "frontend/src/game/GameView.tsx (truncated)"
       ]
     }
   ],
-  "confidence": 0.73,
+  "confidence": 0.62,
   "changed_files": [
     "frontend-file-summaries.txt",
+    "frontend/src/App.tsx",
     "frontend/src/game/GameView.tsx",
-    "frontend/src/game/traffic/NpcTraffic.tsx",
+    "frontend/src/game/camera/FollowCamera.tsx",
+    "frontend/src/game/ui/HUD.tsx",
     "frontend/src/game/utils/deterministicRandom.ts",
     "frontend/src/game/vehicle/Truck.tsx",
-    "frontend/src/game/world/GasStop.tsx",
+    "frontend/src/game/vehicle/Walker.tsx",
+    "frontend/src/game/world/CityClusters.tsx",
+    "frontend/src/game/world/ConstructionEvents.tsx",
     "frontend/src/game/world/HighwayAndBridge.tsx",
-    "frontend/src/game/world/PowerLines.tsx",
+    "frontend/src/game/world/InfiniteRoad.tsx",
+    "frontend/src/game/world/PowerStations.tsx",
+    "frontend/src/game/world/TruckStop.tsx",
     "frontend/src/game/world/World.tsx",
     "project_state.json"
   ]

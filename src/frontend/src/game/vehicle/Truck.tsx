@@ -1,10 +1,11 @@
 import { useRef, forwardRef, useImperativeHandle } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Mesh, Vector3 } from 'three';
-import { GameMode } from '../../App';
+import { useFrame, useThree } from '@react-three/fiber';
+import { Mesh, Vector3, Raycaster } from 'three';
+import { GameMode, VehicleVariant } from '../../App';
 
 interface TruckProps {
   gameMode: GameMode;
+  vehicleVariant: VehicleVariant;
 }
 
 export interface TruckHandle {
@@ -15,13 +16,14 @@ export interface TruckHandle {
   isAccelerating: boolean;
 }
 
-const Truck = forwardRef<TruckHandle, TruckProps>(({ gameMode }, ref) => {
+const Truck = forwardRef<TruckHandle, TruckProps>(({ gameMode, vehicleVariant }, ref) => {
   const groupRef = useRef<any>(null);
   const velocity = useRef(new Vector3(0, 0, 0));
   const speed = useRef(0);
   const rotation = useRef(0);
   const steering = useRef(0);
   const isAccelerating = useRef(false);
+  const { scene } = useThree();
 
   const keys = useRef({
     forward: false,
@@ -106,14 +108,6 @@ const Truck = forwardRef<TruckHandle, TruckProps>(({ gameMode }, ref) => {
   useFrame((state, delta) => {
     if (!groupRef.current) return;
 
-    // Reset position when entering drive mode
-    if (gameMode === 'drive' && groupRef.current.position.length() > 100) {
-      groupRef.current.position.set(0, 1, 0);
-      rotation.current = 0;
-      speed.current = 0;
-      velocity.current.set(0, 0, 0);
-    }
-
     if (gameMode !== 'drive') return;
 
     const maxSpeed = 30;
@@ -161,12 +155,28 @@ const Truck = forwardRef<TruckHandle, TruckProps>(({ gameMode }, ref) => {
 
     // Update position
     groupRef.current.position.add(velocity.current.clone().multiplyScalar(delta));
+
+    // Height following for bridges/ramps
+    const raycaster = new Raycaster();
+    const rayOrigin = new Vector3(
+      groupRef.current.position.x,
+      groupRef.current.position.y + 10,
+      groupRef.current.position.z
+    );
+    raycaster.set(rayOrigin, new Vector3(0, -1, 0));
+    
+    const intersects = raycaster.intersectObjects(scene.children, true);
+    if (intersects.length > 0) {
+      const groundHeight = intersects[0].point.y;
+      groupRef.current.position.y = groundHeight + 1;
+    }
+
     groupRef.current.rotation.y = rotation.current;
   });
 
   return (
     <group ref={groupRef} position={[0, 1, 0]}>
-      {/* Truck cab - detailed */}
+      {/* Truck cab - detailed semi-truck */}
       <group position={[0, 0, 0.5]}>
         {/* Main cab body */}
         <mesh castShadow position={[0, 1.2, 0]}>

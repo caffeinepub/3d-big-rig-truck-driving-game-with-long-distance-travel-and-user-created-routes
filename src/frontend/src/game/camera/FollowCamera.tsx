@@ -2,14 +2,16 @@ import { useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import { TruckHandle } from '../vehicle/Truck';
+import { WalkerHandle } from '../vehicle/Walker';
 import { GameMode } from '../../App';
 
 interface FollowCameraProps {
-  target: React.RefObject<TruckHandle>;
+  target: React.RefObject<TruckHandle | WalkerHandle>;
   gameMode: GameMode;
+  cameraMode?: 'chase' | 'cab';
 }
 
-export default function FollowCamera({ target, gameMode }: FollowCameraProps) {
+export default function FollowCamera({ target, gameMode, cameraMode = 'chase' }: FollowCameraProps) {
   const { camera } = useThree();
   const currentPos = useRef(new Vector3(0, 5, 10));
   const currentLookAt = useRef(new Vector3(0, 0, 0));
@@ -20,13 +22,37 @@ export default function FollowCamera({ target, gameMode }: FollowCameraProps) {
     const targetPos = target.current.position;
     const targetRot = target.current.rotation;
 
-    // Different camera settings for drive mode vs route-creator
+    // Different camera settings based on mode
     const isDriveMode = gameMode === 'drive';
-    const distance = isDriveMode ? 20 : 15;
-    const height = isDriveMode ? 10 : 8;
-    const lookAheadDistance = isDriveMode ? 8 : 0;
+    const isWalkMode = gameMode === 'walk';
 
-    // Calculate desired camera position (behind and above the truck)
+    let distance: number;
+    let height: number;
+    let lookAheadDistance: number;
+
+    if (isWalkMode) {
+      // Walk mode camera
+      distance = 8;
+      height = 4;
+      lookAheadDistance = 2;
+    } else if (isDriveMode && cameraMode === 'cab') {
+      // Cab view camera (inside truck)
+      distance = -2;
+      height = 2.5;
+      lookAheadDistance = 15;
+    } else if (isDriveMode) {
+      // Chase camera for driving
+      distance = 20;
+      height = 10;
+      lookAheadDistance = 8;
+    } else {
+      // Route creator mode
+      distance = 15;
+      height = 8;
+      lookAheadDistance = 0;
+    }
+
+    // Calculate desired camera position
     const offset = new Vector3(
       Math.sin(targetRot) * -distance,
       height,
@@ -39,12 +65,12 @@ export default function FollowCamera({ target, gameMode }: FollowCameraProps) {
       targetPos.z + offset.z
     );
 
-    // Smooth camera movement (faster in drive mode for better responsiveness)
-    const lerpSpeed = isDriveMode ? 0.08 : 0.05;
+    // Smooth camera movement
+    const lerpSpeed = cameraMode === 'cab' ? 0.15 : (isDriveMode ? 0.08 : 0.05);
     currentPos.current.lerp(desiredPos, lerpSpeed);
     camera.position.copy(currentPos.current);
 
-    // Look ahead of the truck in drive mode for better road visibility
+    // Look ahead
     const lookAhead = new Vector3(
       Math.sin(targetRot) * lookAheadDistance,
       0,
@@ -53,7 +79,7 @@ export default function FollowCamera({ target, gameMode }: FollowCameraProps) {
 
     const lookAtTarget = new Vector3(
       targetPos.x + lookAhead.x, 
-      targetPos.y + 1, 
+      targetPos.y + (cameraMode === 'cab' ? 2 : 1), 
       targetPos.z + lookAhead.z
     );
     currentLookAt.current.lerp(lookAtTarget, 0.1);

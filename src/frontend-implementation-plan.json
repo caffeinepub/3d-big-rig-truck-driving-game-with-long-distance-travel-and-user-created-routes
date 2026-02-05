@@ -1,182 +1,253 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "3D driving world realism upgrades (road, power lines, truck, NPC traffic, highways/bridges, gas stops, textures)",
+  "title": "Expand driving world with endless roads, drivable bridges, events/landmarks, cab camera, walk mode, and semi variant",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Upgrade the main road corridor to a more realistic asphalt surface with variation and clear lane/edge definition while preserving existing road placement and performance.",
+      "summary": "Remove forced truck teleport/reset so continuous driving never snaps back based on distance traveled.",
       "acceptanceCriteria": [
-        "The road corridor in frontend/src/game/world/World.tsx still renders in the same general location/scale, but visually reads as realistic asphalt rather than a flat strip.",
-        "Road has clearly visible lane/edge definition (e.g., subtle lane markings and/or shoulder/edge treatment) without breaking tiling or introducing obvious seams.",
-        "Performance remains stable (no per-frame texture recreation; texture wrapping/repeat is preserved)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/game/world/World.tsx",
-          "operation": "modify",
-          "description": "Update road material to use the higher-realism asphalt textures and add lane/edge definition via an additional lightweight overlay (e.g., markings plane/decal using the markings mask) while preserving the existing road mesh transform, RepeatWrapping, and non-per-frame texture setup."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Improve PowerLines set dressing with more realistic pole variety/details and more believable cabling, keeping deterministic placement and ensuring raycasts do not block ground clicks.",
-      "acceptanceCriteria": [
-        "Power lines still render along the roadside corridor and remain deterministic across reloads.",
-        "Utility pole/cable presentation is more detailed/realistic than the current minimal implementation in frontend/src/game/world/PowerLines.tsx.",
-        "Power line meshes continue to ignore raycasts (or otherwise do not block ground clicks) in route-creator mode."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/game/utils/deterministicRandom.ts",
-          "operation": "create",
-          "description": "Add a small deterministic random/seed utility (stable across reloads) for visual variation in world dressing (e.g., pole variants) without introducing nondeterministic Math.random usage during render."
-        },
-        {
-          "path": "frontend/src/game/world/PowerLines.tsx",
-          "operation": "modify",
-          "description": "Add deterministic pole variety (height/arm/attachments like transformers/guy wires/insulators), improve cable presentation (better sag/segmenting and memoized geometry), and ensure all non-ground-interaction meshes keep raycast disabled so they never block route-creator ground clicks."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Enhance the drivable truck’s visual model (cab/chassis/wheels/details) while preserving existing controls and the imperative TruckHandle fields used by camera/HUD/audio.",
-      "acceptanceCriteria": [
-        "Truck remains drivable with the current keyboard controls and still exposes the same TruckHandle fields used elsewhere (position/velocity/rotation/speed/isAccelerating).",
-        "The vehicle model in frontend/src/game/vehicle/Truck.tsx is visually more truck-like (distinct cab/chassis/wheels and improved silhouette) without breaking shadows or camera following.",
-        "No backend changes are required for the truck visual upgrade."
+        "While in Drive Mode, the truck is never automatically repositioned back to the origin (0,1,0) based on distance traveled.",
+        "The previous reset logic in the truck update loop is removed/disabled, and continuous driving works for several minutes without teleporting."
       ],
       "file_operations": [
         {
           "path": "frontend/src/game/vehicle/Truck.tsx",
           "operation": "modify",
-          "description": "Replace the current simple box-based truck visuals with a more detailed, still-lightweight primitive-based model (separate cab, hood/grille, chassis rails, wheel wells, lights, mirrors/exhaust), keeping the same groupRef transform, shadows, controls logic, and TruckHandle imperative fields intact."
+          "description": "Remove/disable the distance-based position reset logic in the per-frame update loop; keep driving state stable over long distances without teleporting."
+        },
+        {
+          "path": "frontend/src/game/GameView.tsx",
+          "operation": "modify",
+          "description": "Ensure no higher-level mode transitions (Drive/Route Creator/Walk) trigger implicit truck repositioning; keep the truck’s transform persistent unless explicitly reset by user action."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Implement an endless road/highway illusion by recycling road segments forward as the player advances, keeping performance stable.",
+      "acceptanceCriteria": [
+        "The roadway appears endless by reusing/repositioning road/highway segments as the player advances.",
+        "There is no visible “end of road” within normal viewing distance while driving straight for an extended time.",
+        "Frame rate remains stable (no unbounded growth in meshes/objects as distance increases)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/game/world/InfiniteRoad.tsx",
+          "operation": "create",
+          "description": "Create an infinite road system that renders a fixed number of road/marking segments and repositions them based on the player’s forward progress (segment recycling; no unbounded mesh growth)."
+        },
+        {
+          "path": "frontend/src/game/world/World.tsx",
+          "operation": "modify",
+          "description": "Replace the single long road/markings meshes with the new InfiniteRoad component; keep ground-click waypoint placement working by preserving click handlers and avoiding event-blocking overlays."
+        },
+        {
+          "path": "frontend/src/game/GameView.tsx",
+          "operation": "modify",
+          "description": "Wire truck/player position into World/InfiniteRoad so segment recycling updates as the player moves, while maintaining stable render performance."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Make at least one bridge/overpass section drivable via height-following against a bridge deck surface, without breaking route ground-click placement.",
+      "acceptanceCriteria": [
+        "At least one bridge deck in the world is reachable from a roadway connection (e.g., an approach/ramp) and can be driven across.",
+        "When the truck is on the bridge deck, its Y position aligns to the deck height (no floating below the deck, no falling through).",
+        "Route-creator ground clicking still works (drivable/collider meshes do not break waypoint placement interactions)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/game/world/HighwayAndBridge.tsx",
+          "operation": "modify",
+          "description": "Adjust/add a bridge deck with roadway approaches/ramps that connect to the main drivable corridor so the bridge is reachable and intended to be driven across; ensure interactive clicks for route creation remain functional."
+        },
+        {
+          "path": "frontend/src/game/vehicle/Truck.tsx",
+          "operation": "modify",
+          "description": "Add simple height-following: sample the height of drivable surfaces (road/ramps/bridge deck) under the truck each frame and align the truck’s Y position to that surface to prevent falling through/hovering."
+        },
+        {
+          "path": "frontend/src/game/world/World.tsx",
+          "operation": "modify",
+          "description": "Expose/register drivable surfaces (road segments, ramps, bridge deck) so Truck height-following can query them, while keeping Route Creator ground-click interactions working."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Add ambient NPC traffic cars that continuously travel along the road, with safe looping/despawn behavior and no interference with route editing clicks.",
+      "summary": "Add occasional randomized construction-ahead roadside/road-lane events that appear sometimes and recycle with the infinite road.",
       "acceptanceCriteria": [
-        "At runtime, multiple NPC cars appear and move along the road direction in at least one lane, looping/spawning so traffic continues over time.",
-        "NPC cars do not block ground clicking for waypoint placement (raycast disabled or appropriate event handling).",
-        "NPC cars update smoothly and do not cause significant frame drops (avoid excessive geometry/material creation per frame)."
+        "While driving forward, the player periodically encounters a construction setup ahead (not constant; appears sometimes).",
+        "Construction props are positioned relative to the road/highway so they read clearly as a roadwork zone.",
+        "Construction props recycle with the infinite road system (they do not accumulate infinitely in memory)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/game/traffic/NpcTraffic.tsx",
+          "path": "frontend/src/game/world/ConstructionEvents.tsx",
           "operation": "create",
-          "description": "Implement an ambient NPC traffic system using lightweight geometry (preferably instancing) that moves cars along the road direction, recycles them ahead of/behind the player truck, and disables raycasting so traffic never blocks ground clicks."
+          "description": "Implement recycled construction zones (cones/barrels/signs/barriers) whose placement is generated per road segment/tile (stable per tile) and rendered only for currently active tiles to avoid memory growth."
         },
         {
-          "path": "frontend/src/game/GameView.tsx",
+          "path": "frontend/src/game/world/World.tsx",
           "operation": "modify",
-          "description": "Wire NPC traffic into the scene by rendering the new NpcTraffic component within the Canvas and passing the player truck ref (for relative spawn/despawn/looping) while ensuring route-creator ground clicking behavior remains unchanged."
+          "description": "Wire ConstructionEvents into the world near the InfiniteRoad corridor, driven by the same tile/segment indexing so props appear sometimes and recycle as segments move."
+        },
+        {
+          "path": "frontend/src/game/utils/deterministicRandom.ts",
+          "operation": "modify",
+          "description": "Add any small helper needed to support per-tile seeded generation (e.g., derive seed from tile index) so construction placement is stable and non-flickering during a session."
         }
       ]
     },
     {
       "id": "REQ-5",
-      "summary": "Add highway and bridge/overpass world features integrated into the existing scene without breaking route creation interactions.",
+      "summary": "Add believable roadside power station/substation landmarks placed randomly (off-lane), stable during a session.",
       "acceptanceCriteria": [
-        "The world contains at least one clearly identifiable highway-style segment (wider road or multi-lane appearance) in addition to the current main road corridor.",
-        "The world contains at least one bridge/overpass element (raised roadway section with supports/guardrails) that is visually distinct from flat ground roads.",
-        "New structures are placed so the player can visually encounter them while driving; they do not break existing route creation interactions."
+        "Multiple power station/substation landmarks are visible in different locations while driving.",
+        "Power stations are placed off the main drivable lane (no blocking the primary roadway by default).",
+        "Placement is stable during a session (no rapid popping/flickering at the same location)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/game/world/HighwayAndBridge.tsx",
+          "path": "frontend/src/game/world/PowerStations.tsx",
           "operation": "create",
-          "description": "Create a dedicated world feature component that adds (1) a wider multi-lane highway-style segment and (2) at least one raised bridge/overpass with supports/guardrails; ensure meshes that should not capture clicks have raycast disabled."
+          "description": "Create a recycled roadside landmark system that spawns power station/substation clusters off the main lane using deterministic per-tile placement for stable, non-flickering results."
         },
         {
           "path": "frontend/src/game/world/World.tsx",
           "operation": "modify",
-          "description": "Integrate the new highway/bridge features into the existing World group so they are placed near the current drivable corridor and visible during driving, while keeping route-creator clicks working by disabling raycasts on non-ground meshes and preserving existing ground/road click handlers."
+          "description": "Integrate PowerStations alongside the InfiniteRoad tile system so multiple stations appear over time without accumulating infinitely."
         }
       ]
     },
     {
       "id": "REQ-6",
-      "summary": "Add a lightweight, recognizable gas stop set-dressing structure near the road/highway without blocking route-creator clicks.",
+      "summary": "Add city/town areas as dense building clusters that appear along the drive and recycle with the infinite approach.",
       "acceptanceCriteria": [
-        "At least one gas stop structure is visible near the road/highway and reads clearly as a gas station from the driving camera.",
-        "Gas stop meshes do not block route-creator ground clicks (raycast disabled or appropriate click handling).",
-        "Gas stop assets are implemented as lightweight Three.js primitives/materials and/or generated textures stored under frontend/public/assets/generated (no backend asset serving)."
+        "At least one city cluster is visible from the roadway and feels distinct from scattered roadside props (dense buildings vs. random boxes).",
+        "City clusters integrate with the infinite driving approach (repeat/reposition without infinite accumulation)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/game/world/GasStop.tsx",
+          "path": "frontend/src/game/world/CityClusters.tsx",
           "operation": "create",
-          "description": "Add a simple gas stop structure (canopy, pumps, signage) built from lightweight primitives/materials, using generated metal textures where appropriate, and disabling raycasts so it cannot block route-creator ground clicks."
+          "description": "Implement recycled city/town skyline clusters (dense groups of buildings) generated per tile, positioned near the roadway for visibility and distinctness."
         },
         {
           "path": "frontend/src/game/world/World.tsx",
           "operation": "modify",
-          "description": "Place at least one GasStop instance near the road/highway in the existing World scene so it is clearly visible from the follow camera while driving, and ensure it does not interfere with ground click interactions."
+          "description": "Wire CityClusters into the same tile/segment indexing as InfiniteRoad so cities repeat/reposition without infinite mesh growth."
         }
       ]
     },
     {
       "id": "REQ-7",
-      "summary": "Add newly generated textures as static assets under frontend/public/assets/generated and update world components to load and use them.",
+      "summary": "Add semi-truck-only rest stop location(s) with clear TRUCKS ONLY/TRUCK PARKING sign and reachable parking bays sized for a semi.",
       "acceptanceCriteria": [
-        "All new/updated image assets are referenced via /assets/generated/... paths and are loaded on the frontend using the existing texture loading approach (useLoader + RepeatWrapping where applicable).",
-        "No backend endpoints are introduced for serving images.",
-        "The app builds successfully with the new assets included."
+        "At least one rest stop/truck stop location exists near the highway/road with a clear 'TRUCKS ONLY' / 'TRUCK PARKING' style sign (English text).",
+        "The rest stop includes space that visually fits a semi (wider bays/longer pull-through) and is reachable from the drivable road network."
       ],
       "file_operations": [
         {
-          "path": "frontend/public/assets/generated/road-albedo-v2.dim_1024x1024.png",
+          "path": "frontend/src/game/world/TruckStop.tsx",
           "operation": "create",
-          "description": "Add the generated asphalt albedo texture asset as a static file at frontend/public/assets/generated/road-albedo-v2.dim_1024x1024.png."
-        },
-        {
-          "path": "frontend/public/assets/generated/road-normal-v2.dim_1024x1024.png",
-          "operation": "create",
-          "description": "Add the generated asphalt normal map asset as a static file at frontend/public/assets/generated/road-normal-v2.dim_1024x1024.png."
-        },
-        {
-          "path": "frontend/public/assets/generated/road-markings-mask.dim_1024x1024.png",
-          "operation": "create",
-          "description": "Add the generated seamless road markings mask/overlay texture asset as a static file at frontend/public/assets/generated/road-markings-mask.dim_1024x1024.png."
-        },
-        {
-          "path": "frontend/public/assets/generated/guardrail-albedo.dim_1024x1024.png",
-          "operation": "create",
-          "description": "Add the generated guardrail albedo texture asset as a static file at frontend/public/assets/generated/guardrail-albedo.dim_1024x1024.png."
-        },
-        {
-          "path": "frontend/public/assets/generated/guardrail-normal.dim_1024x1024.png",
-          "operation": "create",
-          "description": "Add the generated guardrail normal map asset as a static file at frontend/public/assets/generated/guardrail-normal.dim_1024x1024.png."
-        },
-        {
-          "path": "frontend/public/assets/generated/gas-metal-albedo.dim_1024x1024.png",
-          "operation": "create",
-          "description": "Add the generated painted metal albedo texture asset for the gas station canopy/signage as a static file at frontend/public/assets/generated/gas-metal-albedo.dim_1024x1024.png."
-        },
-        {
-          "path": "frontend/public/assets/generated/gas-metal-normal.dim_1024x1024.png",
-          "operation": "create",
-          "description": "Add the generated painted metal normal map asset for the gas station canopy/signage as a static file at frontend/public/assets/generated/gas-metal-normal.dim_1024x1024.png."
+          "description": "Create a truck-only rest stop scene (parking bays sized for a semi, driveway connection from the road, and visible English sign reading TRUCKS ONLY / TRUCK PARKING)."
         },
         {
           "path": "frontend/src/game/world/World.tsx",
           "operation": "modify",
-          "description": "Update texture loading to reference the newly added generated assets under /assets/generated (including road-albedo-v2.dim_1024x1024.png and road-normal-v2.dim_1024x1024.png, plus road-markings-mask.dim_1024x1024.png if used for lane definition) using the existing useLoader + RepeatWrapping approach."
+          "description": "Place TruckStop near the InfiniteRoad corridor using tile-based placement so it is reachable from the drivable road and does not accumulate infinitely."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Add a toggleable cab/seat-view camera mode in addition to the existing follow/chase camera.",
+      "acceptanceCriteria": [
+        "A new 'Cab/Seat View' camera mode exists and can be toggled on/off during Drive Mode (via a HUD button and/or a keybind).",
+        "Cab view places the camera inside/near the truck cab with an appropriate forward-looking angle.",
+        "Switching camera modes is smooth and does not break driving controls or HUD speed display."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/game/camera/FollowCamera.tsx",
+          "operation": "modify",
+          "description": "Extend FollowCamera to support multiple camera modes (chase vs cab/seat) with smooth transitions, keeping existing chase behavior intact."
         },
         {
-          "path": "frontend/src/game/world/HighwayAndBridge.tsx",
+          "path": "frontend/src/game/GameView.tsx",
           "operation": "modify",
-          "description": "Load and apply guardrail textures from /assets/generated (frontend/public/assets/generated/guardrail-albedo.dim_1024x1024.png and frontend/public/assets/generated/guardrail-normal.dim_1024x1024.png) using useLoader and RepeatWrapping; ensure textures/materials are created once and reused."
+          "description": "Add camera mode state (chase/cab) during Drive Mode, pass it to FollowCamera, and implement a keybind and/or handler for toggling."
         },
         {
-          "path": "frontend/src/game/world/GasStop.tsx",
+          "path": "frontend/src/game/ui/HUD.tsx",
           "operation": "modify",
-          "description": "Load and apply gas station metal textures from /assets/generated (frontend/public/assets/generated/gas-metal-albedo.dim_1024x1024.png and frontend/public/assets/generated/gas-metal-normal.dim_1024x1024.png) using useLoader and RepeatWrapping; ensure textures/materials are created once and reused."
+          "description": "Add a HUD control to toggle Cab/Seat View during Drive Mode and ensure speed display and driving controls remain unaffected."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Add Walk Mode with W/A/S/D and arrow-key movement, and update HUD controls help based on active mode.",
+      "acceptanceCriteria": [
+        "The app supports a Walk Mode distinct from Drive Mode (player is on-foot instead of controlling the truck).",
+        "In Walk Mode, the player can move using W/ArrowUp (forward), S/ArrowDown (backward), A/ArrowLeft (left), D/ArrowRight (right).",
+        "The HUD controls help changes based on the active mode to show the correct keys for walking vs driving.",
+        "Entering/exiting Walk Mode does not cause teleport resets like the previous bug, and does not break Route Creator mode behavior."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Extend GameMode to include 'walk' and wire a UI toggle to enter/exit Walk Mode without introducing new routes/pages."
+        },
+        {
+          "path": "frontend/src/game/vehicle/Walker.tsx",
+          "operation": "create",
+          "description": "Create an on-foot player controller with W/A/S/D and arrow key movement, exposing an imperative handle compatible with camera/HUD needs (position/rotation/speed as applicable)."
+        },
+        {
+          "path": "frontend/src/game/GameView.tsx",
+          "operation": "modify",
+          "description": "Render Walker in Walk Mode and Truck in Drive Mode; ensure switching modes preserves transforms without teleport resets and keeps Route Creator behavior intact."
+        },
+        {
+          "path": "frontend/src/game/ui/HUD.tsx",
+          "operation": "modify",
+          "description": "Update the controls help panel to conditionally display Drive controls vs Walk controls based on active mode."
+        },
+        {
+          "path": "frontend/src/game/camera/FollowCamera.tsx",
+          "operation": "modify",
+          "description": "Support following either the Truck or Walker target depending on mode, reusing smooth follow behavior while preserving existing route-creator camera behavior."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Add a clearer semi-truck vehicle option/variant while preserving existing controls and the imperative truck state interface used by camera/HUD/audio.",
+      "acceptanceCriteria": [
+        "The player’s vehicle reads more clearly as a semi-truck (tractor-trailer proportions/details) compared to the current model.",
+        "Driving controls remain the same (W/A/S/D + arrow keys) and the camera/HUD/audio continue to function using the truck ref/state.",
+        "If a selection/toggle is added, it is accessible in the UI without breaking existing gameplay modes."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/game/vehicle/Truck.tsx",
+          "operation": "modify",
+          "description": "Refactor Truck rendering to support a clearer semi-truck variant (tractor + trailer styling/details) while preserving the existing imperative handle fields (position/velocity/rotation/speed/isAccelerating) and controls."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add an in-app UI toggle/selector for vehicle variant (e.g., Semi vs existing) that is accessible without creating new pages and does not break Drive/Walk/Route Creator mode switching."
+        },
+        {
+          "path": "frontend/src/game/GameView.tsx",
+          "operation": "modify",
+          "description": "Pass the selected vehicle variant into Truck so camera/HUD/audio continue to rely on the same truck ref/state interface."
         }
       ]
     }

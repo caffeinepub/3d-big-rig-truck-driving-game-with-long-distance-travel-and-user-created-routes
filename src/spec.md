@@ -1,15 +1,18 @@
 # Specification
 
 ## Summary
-**Goal:** Improve realism and variety in the 3D driving world by enhancing road/power line/truck visuals, adding ambient NPC traffic, and introducing highway/bridge and gas stop set dressing.
+**Goal:** Expand the driving world so players can continuously drive on endless highways (including drivable bridges) with added roadside points of interest, new camera and movement modes, and a clearer semi-truck vehicle option.
 
 **Planned changes:**
-- Upgrade the main road corridor visuals with more realistic asphalt detail and clear lane/edge definition while preserving the existing road layout and texture tiling/repeat performance.
-- Enhance roadside power lines with more detailed/varied poles and more believable cable runs, keeping deterministic placement and ensuring they don’t block ground clicks in route-creation mode.
-- Improve the drivable truck’s visual model to be more truck-like (cab/chassis/wheels) without changing driving controls or the existing TruckHandle state contract used by camera/HUD/audio.
-- Add continuous ambient NPC traffic cars that spawn/loop along the road, pass the player, and do not interfere with route editing clicks.
-- Add additional road features: at least one highway-style (wider/multi-lane) segment and at least one bridge/overpass element, placed so they can be encountered while driving and do not break route creation interactions.
-- Add at least one recognizable gas stop structure near the road/highway (visual set dressing only) using lightweight primitives/materials and generated textures, ensuring it doesn’t block route-creator ground clicks.
-- Add newly generated textures under `frontend/public/assets/generated` and update world/vehicle components to load them via the existing frontend texture-loading approach.
+- Remove the forced truck reset/teleport behavior during driving so the vehicle is not snapped back after traveling far.
+- Implement an infinite highway system by reusing/repositioning road segments to eliminate any visible “end of road” while keeping performance stable.
+- Add at least one drivable bridge/overpass section with a driveable deck, collision, and height-following so the truck can drive onto and across elevated roadway.
+- Add occasional randomized “construction ahead” roadside/roadway events (cones/barrels/signs/barriers and lane-closure style setups) that recycle with the infinite road system.
+- Add random power station/substation landmarks placed believably off the main lane with stable placement (no flickering/popping at the same spot).
+- Add city/town clusters as recognizable dense building groups that appear along the drive and integrate with the infinite world approach.
+- Add at least one semi-truck-only rest stop location near the highway with clear “TRUCKS ONLY” / “TRUCK PARKING” signage and semi-suitable parking bays.
+- Add a toggleable cab/seat-view camera mode in addition to the existing chase camera without breaking controls/HUD.
+- Add a Walk Mode that can be entered/exited, with movement on W/A/S/D and arrow keys, and update the on-screen controls help based on the active mode.
+- Add a more clearly semi-truck (tractor + trailer styling) vehicle option/variant while keeping existing driving controls and the existing truck state interface used by camera/HUD/audio.
 
-**User-visible outcome:** Roads, power lines, and the truck look more realistic; NPC cars continuously drive by; and the world includes visible highway/bridge features and a gas stop point of interest while route creation remains usable.
+**User-visible outcome:** The player can drive continuously on highways that feel endless (including drivable bridges), encounter occasional construction zones, pass power stations and city clusters, pull into a truck-only rest stop, toggle between chase and in-cab camera views, switch into an on-foot walk mode with updated control hints, and use a more clearly “semi-truck” vehicle.

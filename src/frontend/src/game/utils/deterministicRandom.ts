@@ -31,4 +31,11 @@ export class DeterministicRandom {
   int(min: number, max: number): number {
     return Math.floor(this.range(min, max));
   }
+
+  /**
+   * Creates a new generator with a derived seed
+   */
+  derive(offset: number): DeterministicRandom {
+    return new DeterministicRandom(this.seed + offset);
+  }
 }
