@@ -1,0 +1,184 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "3D driving world realism upgrades (road, power lines, truck, NPC traffic, highways/bridges, gas stops, textures)",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Upgrade the main road corridor to a more realistic asphalt surface with variation and clear lane/edge definition while preserving existing road placement and performance.",
+      "acceptanceCriteria": [
+        "The road corridor in frontend/src/game/world/World.tsx still renders in the same general location/scale, but visually reads as realistic asphalt rather than a flat strip.",
+        "Road has clearly visible lane/edge definition (e.g., subtle lane markings and/or shoulder/edge treatment) without breaking tiling or introducing obvious seams.",
+        "Performance remains stable (no per-frame texture recreation; texture wrapping/repeat is preserved)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/game/world/World.tsx",
+          "operation": "modify",
+          "description": "Update road material to use the higher-realism asphalt textures and add lane/edge definition via an additional lightweight overlay (e.g., markings plane/decal using the markings mask) while preserving the existing road mesh transform, RepeatWrapping, and non-per-frame texture setup."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Improve PowerLines set dressing with more realistic pole variety/details and more believable cabling, keeping deterministic placement and ensuring raycasts do not block ground clicks.",
+      "acceptanceCriteria": [
+        "Power lines still render along the roadside corridor and remain deterministic across reloads.",
+        "Utility pole/cable presentation is more detailed/realistic than the current minimal implementation in frontend/src/game/world/PowerLines.tsx.",
+        "Power line meshes continue to ignore raycasts (or otherwise do not block ground clicks) in route-creator mode."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/game/utils/deterministicRandom.ts",
+          "operation": "create",
+          "description": "Add a small deterministic random/seed utility (stable across reloads) for visual variation in world dressing (e.g., pole variants) without introducing nondeterministic Math.random usage during render."
+        },
+        {
+          "path": "frontend/src/game/world/PowerLines.tsx",
+          "operation": "modify",
+          "description": "Add deterministic pole variety (height/arm/attachments like transformers/guy wires/insulators), improve cable presentation (better sag/segmenting and memoized geometry), and ensure all non-ground-interaction meshes keep raycast disabled so they never block route-creator ground clicks."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Enhance the drivable truck’s visual model (cab/chassis/wheels/details) while preserving existing controls and the imperative TruckHandle fields used by camera/HUD/audio.",
+      "acceptanceCriteria": [
+        "Truck remains drivable with the current keyboard controls and still exposes the same TruckHandle fields used elsewhere (position/velocity/rotation/speed/isAccelerating).",
+        "The vehicle model in frontend/src/game/vehicle/Truck.tsx is visually more truck-like (distinct cab/chassis/wheels and improved silhouette) without breaking shadows or camera following.",
+        "No backend changes are required for the truck visual upgrade."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/game/vehicle/Truck.tsx",
+          "operation": "modify",
+          "description": "Replace the current simple box-based truck visuals with a more detailed, still-lightweight primitive-based model (separate cab, hood/grille, chassis rails, wheel wells, lights, mirrors/exhaust), keeping the same groupRef transform, shadows, controls logic, and TruckHandle imperative fields intact."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Add ambient NPC traffic cars that continuously travel along the road, with safe looping/despawn behavior and no interference with route editing clicks.",
+      "acceptanceCriteria": [
+        "At runtime, multiple NPC cars appear and move along the road direction in at least one lane, looping/spawning so traffic continues over time.",
+        "NPC cars do not block ground clicking for waypoint placement (raycast disabled or appropriate event handling).",
+        "NPC cars update smoothly and do not cause significant frame drops (avoid excessive geometry/material creation per frame)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/game/traffic/NpcTraffic.tsx",
+          "operation": "create",
+          "description": "Implement an ambient NPC traffic system using lightweight geometry (preferably instancing) that moves cars along the road direction, recycles them ahead of/behind the player truck, and disables raycasting so traffic never blocks ground clicks."
+        },
+        {
+          "path": "frontend/src/game/GameView.tsx",
+          "operation": "modify",
+          "description": "Wire NPC traffic into the scene by rendering the new NpcTraffic component within the Canvas and passing the player truck ref (for relative spawn/despawn/looping) while ensuring route-creator ground clicking behavior remains unchanged."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Add highway and bridge/overpass world features integrated into the existing scene without breaking route creation interactions.",
+      "acceptanceCriteria": [
+        "The world contains at least one clearly identifiable highway-style segment (wider road or multi-lane appearance) in addition to the current main road corridor.",
+        "The world contains at least one bridge/overpass element (raised roadway section with supports/guardrails) that is visually distinct from flat ground roads.",
+        "New structures are placed so the player can visually encounter them while driving; they do not break existing route creation interactions."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/game/world/HighwayAndBridge.tsx",
+          "operation": "create",
+          "description": "Create a dedicated world feature component that adds (1) a wider multi-lane highway-style segment and (2) at least one raised bridge/overpass with supports/guardrails; ensure meshes that should not capture clicks have raycast disabled."
+        },
+        {
+          "path": "frontend/src/game/world/World.tsx",
+          "operation": "modify",
+          "description": "Integrate the new highway/bridge features into the existing World group so they are placed near the current drivable corridor and visible during driving, while keeping route-creator clicks working by disabling raycasts on non-ground meshes and preserving existing ground/road click handlers."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Add a lightweight, recognizable gas stop set-dressing structure near the road/highway without blocking route-creator clicks.",
+      "acceptanceCriteria": [
+        "At least one gas stop structure is visible near the road/highway and reads clearly as a gas station from the driving camera.",
+        "Gas stop meshes do not block route-creator ground clicks (raycast disabled or appropriate click handling).",
+        "Gas stop assets are implemented as lightweight Three.js primitives/materials and/or generated textures stored under frontend/public/assets/generated (no backend asset serving)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/game/world/GasStop.tsx",
+          "operation": "create",
+          "description": "Add a simple gas stop structure (canopy, pumps, signage) built from lightweight primitives/materials, using generated metal textures where appropriate, and disabling raycasts so it cannot block route-creator ground clicks."
+        },
+        {
+          "path": "frontend/src/game/world/World.tsx",
+          "operation": "modify",
+          "description": "Place at least one GasStop instance near the road/highway in the existing World scene so it is clearly visible from the follow camera while driving, and ensure it does not interfere with ground click interactions."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Add newly generated textures as static assets under frontend/public/assets/generated and update world components to load and use them.",
+      "acceptanceCriteria": [
+        "All new/updated image assets are referenced via /assets/generated/... paths and are loaded on the frontend using the existing texture loading approach (useLoader + RepeatWrapping where applicable).",
+        "No backend endpoints are introduced for serving images.",
+        "The app builds successfully with the new assets included."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/public/assets/generated/road-albedo-v2.dim_1024x1024.png",
+          "operation": "create",
+          "description": "Add the generated asphalt albedo texture asset as a static file at frontend/public/assets/generated/road-albedo-v2.dim_1024x1024.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/road-normal-v2.dim_1024x1024.png",
+          "operation": "create",
+          "description": "Add the generated asphalt normal map asset as a static file at frontend/public/assets/generated/road-normal-v2.dim_1024x1024.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/road-markings-mask.dim_1024x1024.png",
+          "operation": "create",
+          "description": "Add the generated seamless road markings mask/overlay texture asset as a static file at frontend/public/assets/generated/road-markings-mask.dim_1024x1024.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/guardrail-albedo.dim_1024x1024.png",
+          "operation": "create",
+          "description": "Add the generated guardrail albedo texture asset as a static file at frontend/public/assets/generated/guardrail-albedo.dim_1024x1024.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/guardrail-normal.dim_1024x1024.png",
+          "operation": "create",
+          "description": "Add the generated guardrail normal map asset as a static file at frontend/public/assets/generated/guardrail-normal.dim_1024x1024.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/gas-metal-albedo.dim_1024x1024.png",
+          "operation": "create",
+          "description": "Add the generated painted metal albedo texture asset for the gas station canopy/signage as a static file at frontend/public/assets/generated/gas-metal-albedo.dim_1024x1024.png."
+        },
+        {
+          "path": "frontend/public/assets/generated/gas-metal-normal.dim_1024x1024.png",
+          "operation": "create",
+          "description": "Add the generated painted metal normal map asset for the gas station canopy/signage as a static file at frontend/public/assets/generated/gas-metal-normal.dim_1024x1024.png."
+        },
+        {
+          "path": "frontend/src/game/world/World.tsx",
+          "operation": "modify",
+          "description": "Update texture loading to reference the newly added generated assets under /assets/generated (including road-albedo-v2.dim_1024x1024.png and road-normal-v2.dim_1024x1024.png, plus road-markings-mask.dim_1024x1024.png if used for lane definition) using the existing useLoader + RepeatWrapping approach."
+        },
+        {
+          "path": "frontend/src/game/world/HighwayAndBridge.tsx",
+          "operation": "modify",
+          "description": "Load and apply guardrail textures from /assets/generated (frontend/public/assets/generated/guardrail-albedo.dim_1024x1024.png and frontend/public/assets/generated/guardrail-normal.dim_1024x1024.png) using useLoader and RepeatWrapping; ensure textures/materials are created once and reused."
+        },
+        {
+          "path": "frontend/src/game/world/GasStop.tsx",
+          "operation": "modify",
+          "description": "Load and apply gas station metal textures from /assets/generated (frontend/public/assets/generated/gas-metal-albedo.dim_1024x1024.png and frontend/public/assets/generated/gas-metal-normal.dim_1024x1024.png) using useLoader and RepeatWrapping; ensure textures/materials are created once and reused."
+        }
+      ]
+    }
+  ]
+}

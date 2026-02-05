@@ -1,0 +1,144 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-improve-the-road-surface-visuals-to-look-more-realistic-asphalt-detail-variation-and-clear-lane-edge-definition-while-keeping-the-current-road-corridor-drivable-and-aligned-with-the-existing-world-layout",
+      "featureTitle": "Improve the road surface visuals to look more realistic (asphalt detail, variation, and clear lane/edge definition) while keeping the current road corridor drivable and aligned with the existing world layout.",
+      "files": [
+        "frontend/src/game/world/World.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-upgrade-the-power-line-set-dressing-to-appear-more-realistic-pole-variety-details-and-more-believable-cabling-runs-while-preserving-deterministic-placement-and-ensuring-power-line-meshes-do-not-interfere-with-ground-click-interactions-for-route-creation",
+      "featureTitle": "Upgrade the power line set dressing to appear more realistic (pole variety/details and more believable cabling runs) while preserving deterministic placement and ensuring power line meshes do not interfere with ground click interactions for route creation.",
+      "files": [
+        "frontend/src/game/utils/deterministicRandom.ts",
+        "frontend/src/game/world/PowerLines.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-make-the-drivable-truck-look-more-realistic-more-detailed-proportions-and-parts-while-keeping-the-existing-driving-controls-and-the-imperative-truck-state-used-by-the-camera-hud-audio",
+      "featureTitle": "Make the drivable truck look more realistic (more detailed proportions and parts) while keeping the existing driving controls and the imperative truck state used by the camera/HUD/audio.",
+      "files": [
+        "frontend/src/game/vehicle/Truck.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-npc-traffic-cars-that-drive-along-the-road-and-pass-by-the-player-truck-continuous-ambient-traffic-with-safe-despawn-behavior-and-no-interference-with-route-editing-clicks",
+      "featureTitle": "Add NPC traffic cars that drive along the road and pass by the player truck (continuous ambient traffic), with safe/despawn behavior and no interference with route editing clicks.",
+      "files": [
+        "frontend/src/game/GameView.tsx",
+        "frontend/src/game/traffic/NpcTraffic.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-additional-world-road-features-representing-highways-and-bridges-overpasses-e-g-a-wider-multi-lane-highway-segment-and-at-least-one-bridge-raised-crossing-integrated-into-the-existing-world-scene",
+      "featureTitle": "Add additional world road features representing highways and bridges/overpasses (e.g., a wider multi-lane highway segment and at least one bridge/raised crossing) integrated into the existing world scene.",
+      "files": [
+        "frontend/src/game/world/HighwayAndBridge.tsx",
+        "frontend/src/game/world/World.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-gas-places-stops-to-the-world-as-recognizable-roadside-points-of-interest-e-g-simple-gas-station-structure-with-canopy-pumps-signage-positioned-near-the-road-highway",
+      "featureTitle": "Add gas places/stops to the world as recognizable roadside points of interest (e.g., simple gas station structure with canopy/pumps/signage) positioned near the road/highway.",
+      "files": [
+        "frontend/src/game/world/GasStop.tsx",
+        "frontend/src/game/world/World.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-any-newly-generated-textures-as-static-assets-under-frontend-public-assets-generated-and-update-the-world-vehicle-components-to-load-and-use-them-appropriately",
+      "featureTitle": "Add any newly generated textures as static assets under frontend/public/assets/generated and update the world/vehicle components to load and use them appropriately.",
+      "files": [
+        "frontend/src/game/world/GasStop.tsx",
+        "frontend/src/game/world/HighwayAndBridge.tsx",
+        "frontend/src/game/world/World.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

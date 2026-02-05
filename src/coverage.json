@@ -1,0 +1,144 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-05T21:26:27.680Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 7,
+    "implemented": 7,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Improve the road surface visuals to look more realistic (asphalt detail, variation, and clear lane/edge definition) while keeping the current road corridor drivable and aligned with the existing world layout.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/game/world/World.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/game/world/World.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Upgrade the power line set dressing to appear more realistic (pole variety/details and more believable cabling runs) while preserving deterministic placement and ensuring power line meshes do not interfere with ground click interactions for route creation.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/game/utils/deterministicRandom.ts",
+          "frontend/src/game/world/PowerLines.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/game/utils/deterministicRandom.ts",
+          "frontend/src/game/world/PowerLines.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Make the drivable truck look more realistic (more detailed proportions and parts) while keeping the existing driving controls and the imperative truck state used by the camera/HUD/audio.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/game/vehicle/Truck.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/game/vehicle/Truck.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Add NPC traffic cars that drive along the road and pass by the player truck (continuous ambient traffic), with safe/despawn behavior and no interference with route editing clicks.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/game/traffic/NpcTraffic.tsx",
+          "frontend/src/game/GameView.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/game/traffic/NpcTraffic.tsx",
+          "frontend/src/game/GameView.tsx"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Add additional world road features representing highways and bridges/overpasses (e.g., a wider multi-lane highway segment and at least one bridge/raised crossing) integrated into the existing world scene.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/game/world/HighwayAndBridge.tsx",
+          "frontend/src/game/world/World.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/game/world/HighwayAndBridge.tsx",
+          "frontend/src/game/world/World.tsx"
+        ]
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Add gas places/stops to the world as recognizable roadside points of interest (e.g., simple gas station structure with canopy/pumps/signage) positioned near the road/highway.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/game/world/GasStop.tsx",
+          "frontend/src/game/world/World.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/game/world/GasStop.tsx",
+          "frontend/src/game/world/World.tsx"
+        ]
+      },
+      {
+        "id": "REQ-7",
+        "summary": "Add any newly generated textures as static assets under frontend/public/assets/generated and update the world/vehicle components to load and use them appropriately.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/public/assets/generated/road-albedo-v2.dim_1024x1024.png",
+          "frontend/public/assets/generated/road-normal-v2.dim_1024x1024.png",
+          "frontend/public/assets/generated/road-markings-mask.dim_1024x1024.png",
+          "frontend/public/assets/generated/guardrail-albedo.dim_1024x1024.png",
+          "frontend/public/assets/generated/guardrail-normal.dim_1024x1024.png",
+          "frontend/public/assets/generated/gas-metal-albedo.dim_1024x1024.png",
+          "frontend/public/assets/generated/gas-metal-normal.dim_1024x1024.png",
+          "frontend/src/game/world/World.tsx",
+          "frontend/src/game/world/HighwayAndBridge.tsx",
+          "frontend/src/game/world/GasStop.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/public/assets/generated/road-albedo-v2.dim_1024x1024.png",
+          "frontend/public/assets/generated/road-normal-v2.dim_1024x1024.png",
+          "frontend/public/assets/generated/road-markings-mask.dim_1024x1024.png",
+          "frontend/public/assets/generated/guardrail-albedo.dim_1024x1024.png",
+          "frontend/public/assets/generated/guardrail-normal.dim_1024x1024.png",
+          "frontend/public/assets/generated/gas-metal-albedo.dim_1024x1024.png",
+          "frontend/public/assets/generated/gas-metal-normal.dim_1024x1024.png",
+          "frontend/src/game/world/World.tsx",
+          "frontend/src/game/world/HighwayAndBridge.tsx",
+          "frontend/src/game/world/GasStop.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "build-request.json",
+    "caffeine.lock.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/public/assets/generated/gas-metal-albedo.dim_1024x1024.png",
+    "frontend/public/assets/generated/gas-metal-normal.dim_1024x1024.png",
+    "frontend/public/assets/generated/guardrail-albedo.dim_1024x1024.png",
+    "frontend/public/assets/generated/guardrail-normal.dim_1024x1024.png",
+    "frontend/public/assets/generated/road-albedo-v2.dim_1024x1024.png",
+    "frontend/public/assets/generated/road-markings-mask.dim_1024x1024.png",
+    "frontend/public/assets/generated/road-normal-v2.dim_1024x1024.png",
+    "frontend/src/game/GameView.tsx",
+    "frontend/src/game/traffic/NpcTraffic.tsx",
+    "frontend/src/game/utils/deterministicRandom.ts",
+    "frontend/src/game/vehicle/Truck.tsx",
+    "frontend/src/game/world/GasStop.tsx",
+    "frontend/src/game/world/HighwayAndBridge.tsx",
+    "frontend/src/game/world/PowerLines.tsx",
+    "frontend/src/game/world/World.tsx",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Build a driving/roadway environment with realistic roads and roadside infrastructure, traffic NPCs, and route elements like highways, bridges, and gas stops.",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
+  "imageRequirements": "## Required Images\n- Seamless tiling asphalt road texture, higher realism albedo (road-albedo-v2.dim_1024x1024.png)\n- Seamless tiling asphalt road texture, higher realism normal map (road-normal-v2.dim_1024x1024.png)\n- Seamless tiling road markings mask/overlay texture (road-markings-mask.dim_1024x1024.png)\n- Seamless tiling galvanized metal guardrail texture, albedo (guardrail-albedo.dim_1024x1024.png)\n- Seamless tiling galvanized metal guardrail texture, normal map (guardrail-normal.dim_1024x1024.png)\n- Seamless tiling painted metal texture for gas station canopy/signage, albedo (gas-metal-albedo.dim_1024x1024.png)\n- Seamless tiling painted metal texture for gas station canopy/signage, normal map (gas-metal-normal.dim_1024x1024.png)\n\n## Edit Images\n- Increase asphalt realism/detail (road-albedo.dim_1024x1024.png > road-albedo-v2.dim_1024x1024.png)\n- Increase asphalt surface depth/detail (road-normal.dim_1024x1024.png > road-normal-v2.dim_1024x1024.png)",
+  "existing_features": [
+    {
+      "id": "feature-improve-the-road-surface-visuals-to-look-more-realistic-asphalt-detail-variation-and-clear-lane-edge-definition-while-keeping-the-current-road-corridor-drivable-and-aligned-with-the-existing-world-layout",
+      "title": "Improve the road surface visuals to look more realistic (asphalt detail, variation, and clear lane/edge definition) while keeping the current road corridor drivable and aligned with the existing world layout.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-upgrade-the-power-line-set-dressing-to-appear-more-realistic-pole-variety-details-and-more-believable-cabling-runs-while-preserving-deterministic-placement-and-ensuring-power-line-meshes-do-not-interfere-with-ground-click-interactions-for-route-creation",
+      "title": "Upgrade the power line set dressing to appear more realistic (pole variety/details and more believable cabling runs) while preserving deterministic placement and ensuring power line meshes do not interfere with ground click interactions for route creation.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-drivable-truck-look-more-realistic-more-detailed-proportions-and-parts-while-keeping-the-existing-driving-controls-and-the-imperative-truck-state-used-by-the-camera-hud-audio",
+      "title": "Make the drivable truck look more realistic (more detailed proportions and parts) while keeping the existing driving controls and the imperative truck state used by the camera/HUD/audio.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-npc-traffic-cars-that-drive-along-the-road-and-pass-by-the-player-truck-continuous-ambient-traffic-with-safe-despawn-behavior-and-no-interference-with-route-editing-clicks",
+      "title": "Add NPC traffic cars that drive along the road and pass by the player truck (continuous ambient traffic), with safe/despawn behavior and no interference with route editing clicks.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-additional-world-road-features-representing-highways-and-bridges-overpasses-e-g-a-wider-multi-lane-highway-segment-and-at-least-one-bridge-raised-crossing-integrated-into-the-existing-world-scene",
+      "title": "Add additional world road features representing highways and bridges/overpasses (e.g., a wider multi-lane highway segment and at least one bridge/raised crossing) integrated into the existing world scene.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-gas-places-stops-to-the-world-as-recognizable-roadside-points-of-interest-e-g-simple-gas-station-structure-with-canopy-pumps-signage-positioned-near-the-road-highway",
+      "title": "Add gas places/stops to the world as recognizable roadside points of interest (e.g., simple gas station structure with canopy/pumps/signage) positioned near the road/highway.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-any-newly-generated-textures-as-static-assets-under-frontend-public-assets-generated-and-update-the-world-vehicle-components-to-load-and-use-them-appropriately",
+      "title": "Add any newly generated textures as static assets under frontend/public/assets/generated and update the world/vehicle components to load and use them appropriately.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Improve environment visuals: more realistic roads",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Add roadside infrastructure: power lines",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Add a truck vehicle asset",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Add NPC cars that drive by on the road (traffic)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Add route/world layout elements: highways and bridges",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Add gas places/stops (e.g., gas stations)",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Enhance 3D driving world realism: road, power lines, truck visuals, NPC traffic, highways/bridges, and gas stops",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

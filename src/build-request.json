@@ -1,0 +1,166 @@
+{
+  "kind": "build_request",
+  "title": "Enhance 3D driving world realism: road, power lines, truck visuals, NPC traffic, highways/bridges, and gas stops",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Improve the road surface visuals to look more realistic (asphalt detail, variation, and clear lane/edge definition) while keeping the current road corridor drivable and aligned with the existing world layout.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "user-1"
+        ],
+        "quotes": [
+          "and more realistic road ..."
+        ]
+      },
+      "acceptanceCriteria": [
+        "The road corridor in frontend/src/game/world/World.tsx still renders in the same general location/scale, but visually reads as realistic asphalt rather than a flat strip.",
+        "Road has clearly visible lane/edge definition (e.g., subtle lane markings and/or shoulder/edge treatment) without breaking tiling or introducing obvious seams.",
+        "Performance remains stable (no per-frame texture recreation; texture wrapping/repeat is preserved)."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Upgrade the power line set dressing to appear more realistic (pole variety/details and more believable cabling runs) while preserving deterministic placement and ensuring power line meshes do not interfere with ground click interactions for route creation.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "user-1"
+        ],
+        "quotes": [
+          "... and power lines ..."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Power lines still render along the roadside corridor and remain deterministic across reloads.",
+        "Utility pole/cable presentation is more detailed/realistic than the current minimal implementation in frontend/src/game/world/PowerLines.tsx.",
+        "Power line meshes continue to ignore raycasts (or otherwise do not block ground clicks) in route-creator mode."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Make the drivable truck look more realistic (more detailed proportions and parts) while keeping the existing driving controls and the imperative truck state used by the camera/HUD/audio.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "user-1"
+        ],
+        "quotes": [
+          "... and truck ..."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Truck remains drivable with the current keyboard controls and still exposes the same TruckHandle fields used elsewhere (position/velocity/rotation/speed/isAccelerating).",
+        "The vehicle model in frontend/src/game/vehicle/Truck.tsx is visually more truck-like (distinct cab/chassis/wheels and improved silhouette) without breaking shadows or camera following.",
+        "No backend changes are required for the truck visual upgrade."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Add NPC traffic cars that drive along the road and pass by the player truck (continuous ambient traffic), with safe/despawn behavior and no interference with route editing clicks.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "user-1"
+        ],
+        "quotes": [
+          "add npc cars go by on road"
+        ]
+      },
+      "acceptanceCriteria": [
+        "At runtime, multiple NPC cars appear and move along the road direction in at least one lane, looping/spawning so traffic continues over time.",
+        "NPC cars do not block ground clicking for waypoint placement (raycast disabled or appropriate event handling).",
+        "NPC cars update smoothly and do not cause significant frame drops (avoid excessive geometry/material creation per frame)."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Add additional world road features representing highways and bridges/overpasses (e.g., a wider multi-lane highway segment and at least one bridge/raised crossing) integrated into the existing world scene.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "user-1"
+        ],
+        "quotes": [
+          "... and routes highways and bridges ..."
+        ]
+      },
+      "acceptanceCriteria": [
+        "The world contains at least one clearly identifiable highway-style segment (wider road or multi-lane appearance) in addition to the current main road corridor.",
+        "The world contains at least one bridge/overpass element (raised roadway section with supports/guardrails) that is visually distinct from flat ground roads.",
+        "New structures are placed so the player can visually encounter them while driving; they do not break existing route creation interactions."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Add gas places/stops to the world as recognizable roadside points of interest (e.g., simple gas station structure with canopy/pumps/signage) positioned near the road/highway.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "user-1"
+        ],
+        "quotes": [
+          "... and gas places"
+        ]
+      },
+      "acceptanceCriteria": [
+        "At least one gas stop structure is visible near the road/highway and reads clearly as a gas station from the driving camera.",
+        "Gas stop meshes do not block route-creator ground clicks (raycast disabled or appropriate click handling).",
+        "Gas stop assets are implemented as lightweight Three.js primitives/materials and/or generated textures stored under frontend/public/assets/generated (no backend asset serving)."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Add any newly generated textures as static assets under frontend/public/assets/generated and update the world/vehicle components to load and use them appropriately.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "user-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All new/updated image assets are referenced via /assets/generated/... paths and are loaded on the frontend using the existing texture loading approach (useLoader + RepeatWrapping where applicable).",
+        "No backend endpoints are introduced for serving images.",
+        "The app builds successfully with the new assets included."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify files under frontend/src/components/ui (read-only shadcn/ui sources).",
+    "Do not modify frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, or frontend/src/main.tsx (immutable paths).",
+    "Backend must remain a single Motoko actor in backend/main.mo; introduce backend changes only if strictly required by the requested world/visual features."
+  ],
+  "nonGoals": [
+    "Implementing real-world map data, GPS, or geolocation-based routing.",
+    "Adding multiplayer/real-time traffic synchronization.",
+    "Adding third-party 3D model downloads or external asset pipelines; keep assets local and lightweight.",
+    "Implementing a full economy/refueling mechanic for gas stops (visual set dressing only unless explicitly requested later)."
+  ],
+  "imageRequirements": {
+    "required": [
+      "Seamless tiling asphalt road texture, higher realism albedo (road-albedo-v2.dim_1024x1024.png)",
+      "Seamless tiling asphalt road texture, higher realism normal map (road-normal-v2.dim_1024x1024.png)",
+      "Seamless tiling road markings mask/overlay texture (road-markings-mask.dim_1024x1024.png)",
+      "Seamless tiling galvanized metal guardrail texture, albedo (guardrail-albedo.dim_1024x1024.png)",
+      "Seamless tiling galvanized metal guardrail texture, normal map (guardrail-normal.dim_1024x1024.png)",
+      "Seamless tiling painted metal texture for gas station canopy/signage, albedo (gas-metal-albedo.dim_1024x1024.png)",
+      "Seamless tiling painted metal texture for gas station canopy/signage, normal map (gas-metal-normal.dim_1024x1024.png)"
+    ],
+    "edits": [
+      "Increase asphalt realism/detail (road-albedo.dim_1024x1024.png > road-albedo-v2.dim_1024x1024.png)",
+      "Increase asphalt surface depth/detail (road-normal.dim_1024x1024.png > road-normal-v2.dim_1024x1024.png)"
+    ]
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}
